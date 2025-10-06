@@ -10,6 +10,7 @@ npm install nodemon
 npx nodemon server.ts
 
 
+
 === Docker ===
 docker build . -t tripbooking
 docker run -d --name tripbooking -p 8888:3000  tripbooking
