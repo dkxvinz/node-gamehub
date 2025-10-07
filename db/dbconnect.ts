@@ -10,7 +10,7 @@ const conn = mysql.createPool({
     port:3309
 })
 
-console.log("Database connection pool created successfully.");
+console.log("เชื่อมได้ยัง 😒");
 
 
 export default conn;

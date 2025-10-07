@@ -14,7 +14,22 @@ app.use(
     })
 );
 
+const allowedOrigins = [
+  "https://my-gamehub-project.firebaseapp.com",
+  "https://my-gamehub-project.web.app"
+];
 
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true); // สำหรับ Postman หรือ server-side request
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true
+}));
 
 app.use(bodyParser.text());
 app.use(bodyParser.json());
