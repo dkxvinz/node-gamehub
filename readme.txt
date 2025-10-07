@@ -14,3 +14,16 @@ npx nodemon server.ts
 === Docker ===
 docker build . -t tripbooking
 docker run -d --name tripbooking -p 8888:3000  tripbooking
+
+
+==== git ====
+git status  
+git add .
+git add path/to/file
+git commit -m "edit laster"
+git push origin main
+
+=== first push project ===
+git remote add origin https://github.com/USERNAME/REPO.git
+git branch -M main
+git push -u origin main

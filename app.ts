@@ -16,7 +16,8 @@ app.use(
 
 const allowedOrigins = [
   "https://my-gamehub-project.firebaseapp.com",
-  "https://my-gamehub-project.web.app"
+  "https://my-gamehub-project.web.app",
+  "*"
 ];
 
 app.use(cors({
