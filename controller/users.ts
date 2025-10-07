@@ -1,10 +1,10 @@
 import bcrypt from 'bcryptjs';
 import { ResultSetHeader } from 'mysql2';
-import express, { Router, Request, Response } from 'express';
-import conn from '../src/db/dbconnect'; 
-import { authMiddleware } from '../src/middleware/auth_middleware';
+import { Router, Request, Response } from 'express';
+import conn from '../db/dbconnect';
+import { authMiddleware } from '../middleware/auth_middleware';
 import  jwt  from 'jsonwebtoken';
-import {User} from '../src/model/user'
+import {User} from '../model/user'
 
 export const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET ||  'GameHub123';

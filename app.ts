@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
-import {router as index} from "../controller/index";
-import { router as users } from "../controller/users";
+import {router as index} from "./controller/index";
+import { router as users } from "./controller/users";
 import bodyParser from "body-parser";
 
 export const app = express();
