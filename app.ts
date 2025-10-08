@@ -10,7 +10,7 @@ export const app = express();
 const allowedOrigins = [
   "https://my-gamehub-project.firebaseapp.com",
   "https://my-gamehub-project.web.app",
-  "*"
+   "http://localhost:4200" 
 ];
 
 app.use(cors({
