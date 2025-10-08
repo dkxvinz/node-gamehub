@@ -6,13 +6,6 @@ import bodyParser from "body-parser";
 
 export const app = express();
 
-app.use(
-    cors({
-        origin: "*",
-        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        allowedHeaders: ["Content-Type", "Authorization"],
-    })
-);
 
 const allowedOrigins = [
   "https://my-gamehub-project.firebaseapp.com",
