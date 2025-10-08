@@ -125,7 +125,7 @@ router.post("/login", async (req, res) => {
 });
 
 router.put("/:id",authMiddleware,async (req,res) =>{
-const userId= parseInt(req.params.id);
+const userId= parseInt(req.params.user_id);
 
 try {
   const userId_logged = req.user.user_id;
@@ -161,7 +161,7 @@ if(updates.length === 0){
 }
 
 values.push(userId);
-const sql = `UPDATE users SET ${updates.join(", ")} WHERE id = ?`;
+const sql = `UPDATE users SET ${updates.join(", ")} WHERE user_id = ?`;
 
 await conn.query(sql, values);
 
