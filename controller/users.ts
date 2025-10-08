@@ -24,7 +24,7 @@ declare module 'express-session' {
     }
 }
 
-router.get("/", async (req: Request, res: Response) => {
+router.get("/", async (req, res) => {
     try {
         const [rows] = await conn.query('SELECT * FROM users');
         res.status(200).json(rows);
@@ -35,6 +35,20 @@ router.get("/", async (req: Request, res: Response) => {
     }
 });
 
+router.get("/profile/:id",authMiddleware,async (req,res) =>{
+  try {
+    const userId = req.params.id;
+    const [rows] = await conn.query('SELECT * FROM users WHERE user_id = ?',[userId]);
+    if((rows as any[]).length === 0 ){
+      return res.status(400).json({message:'user not found'});
+    }
+    res.status(200).json(rows as any[0]);
+  } catch (err:any) {
+    console.error('error profile:',err);
+    return res.status(500).json({error:err.message});
+  }
+
+});
 
 router.post("/register", async (req, res) => {
   const { username, email, password} = req.body;
@@ -106,7 +120,7 @@ router.post("/login", async (req, res) => {
     }
 
     const payload = { userId: user.user_id, role: user.role };
-    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "1h" });
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "15m" });
 
     return res.status(200).json({
       message: `Login successful! Welcome back: ${user.username}`,
