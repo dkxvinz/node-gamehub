@@ -51,10 +51,10 @@ router.get("/profile/:id",authMiddleware,async (req,res) =>{
     console.log("loggedInUser.userId !== parseInt(userIdFromParams) is", userLogged.userId !== parseInt(userId));
     console.log("----------------------------");
 
-if (String(userLogged.userId) !== String(userId) && userLogged.role !== 0) {
+// if (String(userLogged.userId) !== String(userId) && userLogged.role !== 0) {
 
-      return res.status(403).json({message: 'You do not have permission to access this profile.'})
-    }
+//       return res.status(403).json({message: 'You do not have permission to access this profile.'})
+//     }
 
     const [rows] = await conn.query<RowDataPacket[]>('SELECT user_id, username, email, profile_image, wallet_balance FROM users WHERE user_id = ?',[userId]);
     
