@@ -41,7 +41,18 @@ router.get("/profile/:id",authMiddleware,async (req,res) =>{
     const userId = req.params.id;
     const userLogged = req.user;
 
-    if(userLogged.id !== parseInt(userId) && userLogged.role !== 0){
+
+      console.log("--- Backend Security Check ---");
+    console.log("Value of loggedInUser.userId:", userLogged.userId);
+    console.log("Type of loggedInUser.userId: ", typeof userLogged.userId);
+    console.log("Value of userIdFromParams:   ", userId);
+    console.log("Value after parseInt:        ", parseInt(userId));
+    console.log("--- Comparison Result ---");
+    console.log("loggedInUser.userId !== parseInt(userIdFromParams) is", userLogged.userId !== parseInt(userId));
+    console.log("----------------------------");
+
+
+    if(Number(userLogged.id) !== Number(parseInt(userId)) && userLogged.role !== 0){
       return res.status(403).json({message: 'You do not have permission to access this profile.'})
     }
 
