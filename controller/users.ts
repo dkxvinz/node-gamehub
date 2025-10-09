@@ -51,8 +51,8 @@ router.get("/profile/:id",authMiddleware,async (req,res) =>{
     console.log("loggedInUser.userId !== parseInt(userIdFromParams) is", userLogged.userId !== parseInt(userId));
     console.log("----------------------------");
 
+if (String(userLogged.userId) !== String(userId) && userLogged.role !== 0) {
 
-    if(Number(userLogged.id) !== Number(parseInt(userId)) && userLogged.role !== 0){
       return res.status(403).json({message: 'You do not have permission to access this profile.'})
     }
 
