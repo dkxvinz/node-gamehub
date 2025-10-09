@@ -2,7 +2,7 @@ import http from "http";
 import { app } from "./app";
 import conn from "./db/dbconnect";
 
-const PORT  = process.env.port || 3001;
+const PORT  = process.env.port || 3000;
 const server = http.createServer(app);
 
 const testDatabaseConnection = async () => {
