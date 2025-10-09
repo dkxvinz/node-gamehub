@@ -38,7 +38,7 @@ router.get("/", async (req, res) => {
 
 router.get("/profile/:id",authMiddleware,async (req,res) =>{
   try {
-    const userId = req.params.id;
+    const userId = req.params.user_id;
     const userLogged = req.user;
 
 
@@ -81,9 +81,9 @@ router.post("/register", async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
  
-        const sql = "INSERT INTO users(username, email, password, role) VALUES (?, ?, ?, ?)";
+        const sql = "INSERT INTO users(username, email, password,wallet_balance, role) VALUES (?, ?, ?, ?,?)";
      
-        const values = [username, email, hashedPassword, 1]; // ใช้ 'user' แทน 1
+        const values = [username, email, hashedPassword,0, 1]; // ใช้ 'user' แทน 1
 
         const [result] = await conn.query(sql, values);
         const header = result as ResultSetHeader;
