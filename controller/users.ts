@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import { ResultSetHeader } from 'mysql2';
+import { RowDataPacket } from 'mysql2';
 import { Router, Request, Response } from 'express';
 import conn from '../db/dbconnect';
 import { authMiddleware } from '../middleware/auth_middleware';
@@ -38,11 +39,18 @@ router.get("/", async (req, res) => {
 router.get("/profile/:id",authMiddleware,async (req,res) =>{
   try {
     const userId = req.params.id;
-    const [rows] = await conn.query('SELECT * FROM users WHERE user_id = ?',[userId]);
-    if((rows as any[]).length === 0 ){
-      return res.status(400).json({message:'user not found'});
+    const userLogged = req.user;
+
+    if(userLogged.id !== parseInt(userId) && userLogged.role !== 0){
+      return res.status(403).json({message: 'You do not have permission to access this profile.'})
     }
-    res.status(200).json(rows as any[0]);
+
+    const [rows] = await conn.query<RowDataPacket[]>('SELECT user_id, username, email, profile_image, wallet_balance FROM users WHERE user_id = ?',[userId]);
+    
+  if(rows.length===0){
+  return res.status(404).json({message:'user not found'});
+}
+res.status(200).json(rows[0]);
   } catch (err:any) {
     console.error('error profile:',err);
     return res.status(500).json({error:err.message});
@@ -158,7 +166,7 @@ if(username){
 }
 if(email){
   updates.push("email = ?");
-  values.push(username);
+  values.push(email);
 }
 
 if(newPassword){
