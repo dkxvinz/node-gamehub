@@ -196,7 +196,7 @@ if(newPassword){
   values.push(hashedPassword);
 }
 if(profileImageFile){
-  updates.push("profile_image");
+  updates.push("profile_image = ? ");
   values.push(profileImageFile?.path);
 }
 if(updates.length === 0){
