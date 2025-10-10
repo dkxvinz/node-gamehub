@@ -1,15 +1,29 @@
 import bcrypt from 'bcryptjs';
 import { ResultSetHeader } from 'mysql2';
 import { RowDataPacket } from 'mysql2';
-import { Router, Request, Response } from 'express';
+import { Router } from 'express';
 import conn from '../db/dbconnect';
 import { authMiddleware } from '../middleware/auth_middleware';
 import  jwt  from 'jsonwebtoken';
 import {User} from '../model/user'
+import multer from 'multer';
+import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
 
 export const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET ||  'GameHub123';
 
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+      cb(null, 'uploads/');
+  },
+  filename: (req, file, cb) => {
+    const uniqueFileName = uuidv4() + path.extname(file.originalname);
+      cb(null, uniqueFileName);
+      
+  }
+});
+const upload = multer({storage:storage});
 
 declare module 'express-session' {
     interface User {
@@ -42,16 +56,7 @@ router.get("/profile/:id",authMiddleware,async (req,res) =>{
     const userLogged = req.user;
 
 
-      console.log("--- Backend Security Check ---");
-    console.log("Value of loggedInUser.userId:", userLogged.userId);
-    console.log("Type of loggedInUser.userId: ", typeof userLogged.userId);
-    console.log("Value of userIdFromParams:   ", userId);
-    console.log("Value after parseInt:        ", parseInt(userId));
-    console.log("--- Comparison Result ---");
-    console.log("loggedInUser.userId !== parseInt(userIdFromParams) is", userLogged.userId !== parseInt(userId));
-    console.log("----------------------------");
-
-if (String(userLogged.userId) !== String(userId)) {
+if (userLogged.userId!== userId) {
 
       return res.status(403).json({message: 'You do not have permission to access this profile.'})
     }
@@ -157,16 +162,17 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.put("/:id",authMiddleware,async (req,res) =>{
-const userId= parseInt(req.params.user_id);
+router.put("/:id",authMiddleware,upload.single('profile_image'),async (req,res) =>{
+const userIdUpdate= parseInt(req.params.id);
 
 try {
-  const userId_logged = req.user.user_id;
-const role_logged = req.user.role;
-if(role_logged !== 'admin' && userId_logged !== userId){
-  return res.status(403).json({message: " You cat only edit your own profile"});
-}
-const {username,email,newPassword,profile_image} = req.body;
+  const userLogged = req.user;
+    if (userLogged.userId !== userIdUpdate) {
+          return res.status(403).json({ message: "You can only edit your own profile" });
+        }
+
+const {username,email,newPassword} = req.body;
+const profile_image = req.file;
 
 const updates:string[] = [];
 const values: any[] = [];
@@ -193,12 +199,12 @@ if(updates.length === 0){
   return res.status(400).json({message: "No fields to update."});
 }
 
-values.push(userId);
+values.push(userIdUpdate);
 const sql = `UPDATE users SET ${updates.join(", ")} WHERE user_id = ?`;
 
 await conn.query(sql, values);
 
-res.json({message:  `User with ID ${userId} updated successfully.` });
+res.json({message:  `User with ID ${userIdUpdate} updated successfully.` });
   
 } catch (error) {
   console.error("Update User Error:", error);
@@ -213,3 +219,5 @@ export default router;
 router.get("/logout",(req, res) => {
    res.status(200).json({ message: "logout successful" });
 });
+
+
