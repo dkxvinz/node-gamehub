@@ -73,7 +73,7 @@ res.status(200).json(rows[0]);
   }
 
 });
-
+//-------------Register-------------------------
 router.post("/register", async (req, res) => {
   const { username, email, password} = req.body;
 
@@ -107,7 +107,7 @@ router.post("/register", async (req, res) => {
     }
 });
 
-
+//-------------Login---------------------
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
   console.log("LOGIN TRY:", email, password);
@@ -163,6 +163,8 @@ router.post("/login", async (req, res) => {
   }
 });
 
+//-------------Update----------------------
+
 router.put("/:id",authMiddleware,upload.single('profile_image'),async (req,res) =>{
 const userIdUpdate= parseInt(req.params.id);
 
@@ -173,7 +175,8 @@ try {
         }
 
 const {username,email,newPassword} = req.body;
-const profile_image = req.file;
+
+const profileImageFile = req.file;
 
 const updates:string[] = [];
 const values: any[] = [];
@@ -192,9 +195,9 @@ if(newPassword){
   updates.push("password = ?");
   values.push(hashedPassword);
 }
-if(profile_image){
-  updates.push("profile_image = ?");
-  values.push(profile_image);
+if(profileImageFile){
+  updates.push("profile_image");
+  values.push(profileImageFile?.path);
 }
 if(updates.length === 0){
   return res.status(400).json({message: "No fields to update."});
@@ -217,6 +220,8 @@ res.json({message:  `User with ID ${userIdUpdate} updated successfully.` });
 });
 export default router;
 
+
+//----------------Logout-------------------
 router.get("/logout",(req, res) => {
    res.status(200).json({ message: "logout successful" });
 });
