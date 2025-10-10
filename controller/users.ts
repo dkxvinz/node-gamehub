@@ -1,4 +1,3 @@
-import express from 'express';
 import bcrypt from 'bcryptjs';
 import { ResultSetHeader } from 'mysql2';
 import { RowDataPacket } from 'mysql2';
@@ -6,10 +5,7 @@ import { Router } from 'express';
 import conn from '../db/dbconnect';
 import { authMiddleware } from '../middleware/auth_middleware';
 import  jwt  from 'jsonwebtoken';
-import {User} from '../model/user'
-import multer from 'multer';
-import path from 'path';
-import { v4 as uuidv4 } from 'uuid';
+import {User} from '../model/user';
 import { upload } from './upload';
 
 export const router = Router();

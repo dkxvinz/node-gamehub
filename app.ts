@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import {router as index} from "./controller/index";
 import { router as users } from "./controller/users";
-import { router as upload } from "./controller/upload";
+import { router as upload} from "./controller/upload";
 import bodyParser from "body-parser";
 import path from "path";
 
@@ -32,6 +32,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(bodyParser.text());
 app.use(bodyParser.json());
 app.use("/",index);
+app.use("/files",upload);
 app.use("/users",users);
-app.use("/file",upload);
+
 
