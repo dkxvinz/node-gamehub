@@ -184,10 +184,12 @@ const values: any[] = [];
 if(username){
   updates.push("username = ?");
   values.push(username);
+  console.log("new name :",username);
 }
 if(email){
   updates.push("email = ?");
   values.push(email);
+    console.log("new email :",email);
 }
 
 if(newPassword){
@@ -198,6 +200,7 @@ if(newPassword){
 if(profileImageFile){
   updates.push("profile_image = ? ");
   values.push(profileImageFile?.path);
+    console.log("new image file path :",profileImageFile);
 }
 if(updates.length === 0){
   return res.status(400).json({message: "No fields to update."});
