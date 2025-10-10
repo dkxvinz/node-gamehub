@@ -168,7 +168,7 @@ const userIdUpdate= parseInt(req.params.id);
 
 try {
   const userLogged = req.user;
-    if (userLogged.userId !== userIdUpdate) {
+    if (String(userLogged.userId) !== String(userIdUpdate) && userLogged.role !== 0) {
           return res.status(403).json({ message: "You can only edit your own profile" });
         }
 
