@@ -1,3 +1,4 @@
+import express from 'express';
 import bcrypt from 'bcryptjs';
 import { ResultSetHeader } from 'mysql2';
 import { RowDataPacket } from 'mysql2';
@@ -9,21 +10,10 @@ import {User} from '../model/user'
 import multer from 'multer';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import { upload } from './upload';
 
 export const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET ||  'GameHub123';
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-      cb(null, 'uploads/');
-  },
-  filename: (req, file, cb) => {
-    const uniqueFileName = uuidv4() + path.extname(file.originalname);
-      cb(null, uniqueFileName);
-      
-  }
-});
-const upload = multer({storage:storage});
 
 declare module 'express-session' {
     interface User {
@@ -38,6 +28,7 @@ declare module 'express-session' {
         };
     }
 }
+
 
 router.get("/", async (req, res) => {
     try {
@@ -198,9 +189,10 @@ if(newPassword){
   values.push(hashedPassword);
 }
 if(profileImageFile){
-  updates.push("profile_image = ? ");
-  values.push(profileImageFile?.path);
-    console.log("new image file path :",profileImageFile);
+  updates.push("profile_image = ?");
+  values.push(profileImageFile?.filename);
+  console.log("New image file object:", profileImageFile);
+console.log("New image file path:", profileImageFile?.path);
 }
 if(updates.length === 0){
   return res.status(400).json({message: "No fields to update."});
