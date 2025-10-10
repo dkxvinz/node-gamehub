@@ -56,7 +56,7 @@ router.get("/profile/:id",authMiddleware,async (req,res) =>{
     const userLogged = req.user;
 
 
-if (userLogged.userId!== userId) {
+if (String(userLogged.userId) !== String(userId) && userLogged.role !== 0) {
 
       return res.status(403).json({message: 'You do not have permission to access this profile.'})
     }
@@ -154,6 +154,7 @@ router.post("/login", async (req, res) => {
         role: user.role,
         username: user.username,
         email: user.email,
+        profile_image: user.profile_image
       },
     });
   } catch (error) {
