@@ -3,6 +3,7 @@ import cors from "cors";
 import {router as index} from "./controller/index";
 import { router as users } from "./controller/users";
 import { router as upload} from "./controller/upload";
+import { router as trans} from "./controller/trans";
 import bodyParser from "body-parser";
 import path from "path";
 
@@ -34,5 +35,6 @@ app.use(bodyParser.json());
 app.use("/",index);
 app.use("/files",upload);
 app.use("/users",users);
+app.use("/trans",trans);
 
 

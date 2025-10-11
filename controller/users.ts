@@ -11,19 +11,6 @@ import { upload } from './upload';
 export const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET ||  'GameHub123';
 
-declare module 'express-session' {
-    interface User {
-        users?: {
-            user_id: number;
-            username: string;
-            email: string;
-            profile_image: string;
-            wallet_balance:number;
-            role: number;
-          
-        };
-    }
-}
 
 
 router.get("/", async (req, res) => {
@@ -73,9 +60,9 @@ router.post("/register", async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
  
-        const sql = "INSERT INTO users(username, email, password,wallet_balance, role) VALUES (?, ?, ?, ?,?)";
+        const sql = "INSERT INTO users(username, email, password,wallet_balance,profile_image, role) VALUES (?, ?, ?, ?,?,?)";
      
-        const values = [username, email, hashedPassword,0, 1]; // ใช้ 'user' แทน 1
+        const values = [username, email, hashedPassword,0,"default-pfp.jpg", 1]; 
 
         const [result] = await conn.query(sql, values);
         const header = result as ResultSetHeader;
@@ -210,6 +197,19 @@ res.json({message:  `User with ID ${userIdUpdate} updated successfully.` });
 
 });
 export default router;
+
+
+//update wallet_balance
+router.put("/my_wallet/:id", async(req,res) => {
+  const userIdUpdate = parseInt(req.params.id);
+  try {
+    const sql = "SELECT statement, "
+    
+  } catch (error) {
+    
+  }
+}
+)
 
 
 //----------------Logout-------------------

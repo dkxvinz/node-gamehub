@@ -20,7 +20,7 @@ docker run -d --name tripbooking -p 8888:3000  tripbooking
 git status  
 git add .
 git add path/to/file
-git commit -m "updated:  9.54 pm"
+git commit -m "updated:  1.51 am"
 git push origin main
 
 === first push project ===
