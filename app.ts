@@ -4,6 +4,7 @@ import {router as index} from "./controller/index";
 import { router as users } from "./controller/users";
 import { router as upload} from "./controller/upload";
 import { router as trans} from "./controller/trans";
+import { router as games} from "./controller/games";
 import bodyParser from "body-parser";
 import path from "path";
 
@@ -36,5 +37,6 @@ app.use("/",index);
 app.use("/files",upload);
 app.use("/users",users);
 app.use("/trans",trans);
+app.use("/games",games);
 
 

@@ -159,6 +159,8 @@ if(username){
   updates.push("username = ?");
   values.push(username);
   console.log("new name :",username);
+}else{
+  //บันทึกค่าเดิม
 }
 if(email){
   updates.push("email = ?");
