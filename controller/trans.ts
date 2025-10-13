@@ -102,7 +102,7 @@ router.post("/pay/:id",authMiddleware, async (req, res) => {
     const connection = await conn.getConnection(); 
 
     try {
-        if (!gameId) {
+        if (!gameId)  {
             return res.status(400).json({ message: "Game ID is required." });
         }
 
@@ -117,7 +117,7 @@ router.post("/pay/:id",authMiddleware, async (req, res) => {
             throw new Error('Game not found');
         }
         if (users.length === 0) {
-            throw new Error('User not found');
+           return res.status(400).json({ message: "not found your wallet balance!!!!" });
         }
         
         const gamePrice = games[0].price;
@@ -125,7 +125,8 @@ router.post("/pay/:id",authMiddleware, async (req, res) => {
 
         
         if (userBalance < gamePrice) {
-            return res.status(400).json({ message: "Insufficient funds." });
+              await connection.rollback(); 
+            return res.status(400).json({ message: "Please check your wallet balance!!" });
         }
 
       
