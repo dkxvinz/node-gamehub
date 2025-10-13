@@ -3,6 +3,7 @@ import conn from "../db/dbconnect";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 import { Games } from "../model/game_int";
 import { upload } from "./upload";
+import { authMiddleware } from "../middleware/auth_middleware";
 
 export const router = Router();
 
@@ -17,8 +18,28 @@ router.get("/", async (req, res) => {
         return res.status(500).json({ error: err.message });
     }
 });
-//-------------------------------------------------------//
+//----------------------------------------------------------------
+
+//show detail gamehub
 router.get("/:gameId",async (req,res) =>{
+  
+    const gameIdUrl = Number(req.params.gameId);
+    try {
+        const [rows] = await conn.query<RowDataPacket[]>('SELECT * FROM games WHERE game_id = ?',[gameIdUrl]);
+
+          if (rows.length === 0) {
+            return res.status(404).json({ message: `Game with ID ${gameIdUrl} not found.` });
+        }
+        res.status(200).json(rows);
+        console.log("on database: ",rows);
+    } catch (err: any) {
+        console.error(err);
+        return res.status(500).json({ error: err.message });
+    }
+});
+//-------------------------------------------------------//
+//mygame on profile
+router.get("mygame/:gameId",async (req,res) =>{
   try {
     const game_Id = parseInt(req.params.gameId);
      console.log('game id:',game_Id);
@@ -41,6 +62,56 @@ res.status(200).json(rows[0]);
 
 });
 //-----------------------------------------------------
+
+//detail mygame;
+router.get("/mygame/:gameId",authMiddleware,async (req,res) =>{
+  try {
+    const gameIdUrl = Number(req.params.gameId);
+    const userId = req.user;
+     console.log('user id:',userId);
+
+    const [rows] = await conn.query<RowDataPacket[]>('SELECT  game_id, name, price, detail FROM games join orderitems on game_id = item_oid join users on item_oid = user_id  WHERE item_oid.user_id = ? AND item_oid.state',[userId]);
+    
+  if(rows.length===0){
+  return res.status(404).json({message:'game id  not found'});
+}
+
+ console.log(`Found ${rows.length} transactions for user ID: ${userId}`);
+  return res.status(200).json({
+            games: rows 
+        });
+  } catch (err:any) {
+    console.error('error game:',err);
+    return res.status(500).json({error:err.message});
+  }
+
+});
+
+
+router.get("/mygame/:id",async (req,res) =>{
+  try {
+    const userId = req.params.id;
+     console.log('user id:',userId);
+
+    const [rows] = await conn.query<RowDataPacket[]>('SELECT  game_id, name, price, detail FROM games join orderitems on game_id = item_oid join users on item_oid = user_id  WHERE item_oid.user_id = ? AND item_oid.state',[userId]);
+    
+  if(rows.length===0){
+  return res.status(404).json({message:'game id  not found'});
+}
+  const gameCount = rows.length;
+console.log(`Found ${rows.length} transactions for user ID: ${userId}`);
+    
+        return res.status(200).json({rows
+            // count: gameCount,
+            // games: rows 
+        });
+  } catch (err:any) {
+    console.error('error game:',err);
+    return res.status(500).json({error:err.message});
+  }
+
+});
+//-----------------------------------------------------
 // admin build //
 
 router.post("/create", upload.single('image'), async (req, res) => {
@@ -51,7 +122,7 @@ router.post("/create", upload.single('image'), async (req, res) => {
         if (!req.file) {
             return res.status(400).json({ message: "Image file is required." });
         }
-        const imagePath = req.file.path;
+        const imagePath = req.file.filename;
         console.log('imagePath: ',imagePath);
 
         if (!name || !price || !genres || !detail) {
@@ -59,8 +130,7 @@ router.post("/create", upload.single('image'), async (req, res) => {
         }
 
        
-        const createNewGame =
-            "INSERT INTO games (name, price, genres, image, detail, amount, sale_date) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        const createNewGame =   "INSERT INTO games (name, price, genres, image, detail, amount, sale_date) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         const valuesGameData = [name, price, genres, imagePath, detail, 0, new Date()];
 
@@ -137,41 +207,64 @@ router.post("/cart/:game_id", async (req, res) => {
     }
 });
 
-router.post("/purchase/:gameId/:userId", async (req, res) => {
-  const gameIdOrder = parseInt(req.params.gameId);
-  const userIdOrder = parseInt(req.params.userId);
-  const { price, state } = req.body;
-  try {
-    if (!gameIdOrder && !userIdOrder && !price && !state) {
-      return res
-        .status(400)
-        .json({ message: "Invalid user or game or price or state value" });
-    }
 
-    const insertSql = "INSERT INTO orderitems (game_id,user_id,price,state) VALUE(?,?,?,?)";
-    const insertValues = [gameIdOrder, userIdOrder, price, 3];
-    const [insertResult] = await conn.query(insertSql, insertValues);
-    const headerOrderItems = insertResult as ResultSetHeader;
+router.post("/purchase/:gameId", async (req, res) => {
+    const gameId = parseInt(req.params.gameId);
+    const userId = req.user?.id; 
+    const connection = await conn.getConnection();
 
-    if (headerOrderItems.insertId > 0) {
-      console.log(
-        `OrderItem successfully with ID: ${headerOrderItems.insertId}`
-      );
-     }
-
-      return res.status(200).json({
-           message: "Top up successful and wallet updated!",insertValues,
-           OrdersItemsId: headerOrderItems.insertId
-     });
-
+    try {
     
-  
-  
-}catch (error) {
-    console.error("Error during top-up process:", error);
-    return res.status(500).json({ message: "Internal Server Error" });
-  }
+        if (!gameId || !userId) {
+            return res.status(400).json({ message: "Invalid Game ID or User not authenticated." });
+        }
+
+        await connection.beginTransaction();
+
+        const [games] = await connection.query("SELECT price FROM games WHERE id = ?", [gameId]);
+        const game = games as Games[];
+        if (game.length === 0) {
+            throw new Error("Game not found."); 
+        }
+        const gamePrice = game[0].price;
+
+        const orderSql = "INSERT INTO orders (user_id, total_price, order_date) VALUES (?, ?, ?)";
+        const [orderResult] = await connection.query(orderSql, [userId, gamePrice, new Date()]);
+        const headerOrder = orderResult as ResultSetHeader;
+        const newOrderId = headerOrder.insertId;
+
+        if (newOrderId <= 0) {
+            throw new Error("Failed to create an order.");
+        }
+
+        const itemSql = "INSERT INTO orderItems (order_id, game_id, user_id, price, state) VALUES (?, ?, ?, ?, ?)";
+   
+        const [itemResult] = await connection.query(itemSql, [newOrderId, gameId, userId, gamePrice, 4]); 
+        const headerItem = itemResult as ResultSetHeader;
+
+        if (headerItem.insertId <= 0) {
+            throw new Error("Failed to create an order item.");
+        }
+ 
+        await connection.commit();
+
+        return res.status(201).json({
+            message: "Purchase successful!",
+            orderId: newOrderId,
+            itemId: headerItem.insertId
+        });
+
+    } catch (error) {
+        
+        await connection.rollback();
+        console.error("Error during purchase transaction:", error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    } finally {
+
+        connection.release();
+    }
 });
+
 
 
 
