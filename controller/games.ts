@@ -302,65 +302,96 @@ router.post("/purchase/:gameId", async (req, res) => {
   }
 });
 
-// router.put("/:id",authMiddleware,upload.single('profile_image'),async (req,res) =>{
-// const userIdUpdate= parseInt(req.params.id);
+router.put("/update/:id",upload.single('image'),async (req,res) =>{
+const game_Id = parseInt(req.params.id);
 
-// try {
-//   const userLogged = req.user;
-//     if (String(userLogged.userId) !== String(userIdUpdate) && userLogged.role !== 0) {
-//           return res.status(403).json({ message: "You can only edit your own profile" });
-//         }
+try {
+    if (!(game_Id)) {
+          return res.status(400).json({ message: "not found game value!" });
+        }
 
-// const {username,email,newPassword} = req.body;
+const {name,price,genres,detail} = req.body;
 
-// const profileImageFile = req.file;
+const image = req.file;
 
-// const updates:string[] = [];
-// const values: any[] = [];
+const updates:string[] = [];
+const values: any[] = [];
 
-// if(username){
-//   updates.push("username = ?");
-//   values.push(username);
-//   console.log("new name :",username);
-// }else{
-//   //บันทึกค่าเดิม
-// }
-// if(email){
-//   updates.push("email = ?");
-//   values.push(email);
-//     console.log("new email :",email);
-// }
+if(name){
+  updates.push("name = ?");
+  values.push(name);
+  console.log("new name :",name);
+}else{
+  return;
+}
+if(price){
+  updates.push("price = ?");
+  values.push(price);
+    console.log("new price :",price);
+}
 
-// if(newPassword){
-//   const hashedPassword = await bcrypt.hash(newPassword,10);
-//   updates.push("password = ?");
-//   values.push(hashedPassword);
-// }
-// if(profileImageFile){
-//   updates.push("profile_image = ?");
-//   values.push(profileImageFile?.filename);
-//   console.log("New image file object:", profileImageFile);
-// console.log("New image file path:", profileImageFile?.path);
-// }
-// if(updates.length === 0){
-//   return res.status(400).json({message: "No fields to update."});
-// }
+if(genres){
+  updates.push("genres = ?");
+  values.push(genres);
+}
+if(image){
+  updates.push("image = ?");
+  values.push(image?.filename);
+  console.log("New image file object:", image);
+console.log("New image file path:", image?.path);
+}
+if(detail){
+  updates.push("detail = ?");
+  values.push(detail);
+}
+if(updates.length === 0){
+  return res.status(400).json({message: "No fields to update."});
+}
 
-// values.push(userIdUpdate);
-// const sql = `UPDATE users SET ${updates.join(", ")} WHERE user_id = ?`;
+values.push(game_Id);
+const sql = `UPDATE games SET ${updates.join(", ")} WHERE game_id = ?`;
 
-// await conn.query(sql, values);
+await conn.query(sql, values);
 
-// res.json({message:  `User with ID ${userIdUpdate} updated successfully.` });
+res.json({message:  `Game with ID ${name} updated successfully.` });
 
-// } catch (error) {
-//   console.error("Update User Error:", error);
-//         res.status(500).json({ error: "Internal Server Error" });
+} catch (error) {
+  console.error("Update Games Error:", error);
+        res.status(500).json({ error: "Internal Server Error" });
 
-// }
+}
 
-// });
-// export default router;
+});
+
+router.delete("/delete/:gameID",async(req,res)=>{
+  const game_Id = Number(req.params.gameID);
+
+  try {
+    if(!game_Id){
+      return res.status(400).json({message:'not found game id'});
+    }
+
+    const sqlForDelete = 'DELETE FROM games WHERE game_id = ?';
+    const [resultData] = await conn.query(sqlForDelete,[game_Id]);
+    const header = resultData as ResultSetHeader;
+if (header.affectedRows > 0) {
+            // ถ้าลบสำเร็จ (มีแถวที่ถูกลบ)
+            console.log(`Game with ID ${game_Id} was deleted successfully.`);
+            // --- FIX 2: ส่ง Status 204 No Content กลับไป ---
+            return res.status(204).send(); 
+        } else {
+            // ถ้าไม่สำเร็จ (ไม่มีแถวไหนถูกลบ) แสดงว่าไม่มี game ID นี้
+            console.log(`Attempted to delete non-existent game with ID ${game_Id}.`);
+            // --- FIX 2: ส่ง Status 404 Not Found กลับไป ---
+            return res.status(404).json({ message: `Game with ID ${game_Id} not found.` });
+        }
+        
+    } catch (error) {
+        console.log("Error while deleting a game from the database:", error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+});
+
 
 router.put("/update/:state", async (req, res) => {
   const { state } = req.body;

@@ -150,7 +150,7 @@ try {
 
 const {username,email,newPassword} = req.body;
 
-const profileImageFile = req.file;
+const profile_image = req.file;
 
 const updates:string[] = [];
 const values: any[] = [];
@@ -159,8 +159,6 @@ if(username){
   updates.push("username = ?");
   values.push(username);
   console.log("new name :",username);
-}else{
-  //บันทึกค่าเดิม
 }
 if(email){
   updates.push("email = ?");
@@ -173,11 +171,11 @@ if(newPassword){
   updates.push("password = ?");
   values.push(hashedPassword);
 }
-if(profileImageFile){
+if(profile_image){
   updates.push("profile_image = ?");
-  values.push(profileImageFile?.filename);
-  console.log("New image file object:", profileImageFile);
-console.log("New image file path:", profileImageFile?.path);
+  values.push(profile_image?.filename);
+  console.log("New image file object:", profile_image);
+console.log("New image file path:", profile_image?.path);
 }
 if(updates.length === 0){
   return res.status(400).json({message: "No fields to update."});

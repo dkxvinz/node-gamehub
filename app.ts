@@ -10,26 +10,26 @@ import path from "path";
 
 export const app = express();
 
-// app.use(cors()); //localhost
+app.use(cors()); //localhost
 
-const allowedOrigins = [
-  "*",
-  "https://my-gamehub-project.firebaseapp.com",
-  "https://my-gamehub-project.web.app",
-   "http://localhost:4200" 
-];
+// const allowedOrigins = [
+//   "*",
+//   "https://my-gamehub-project.firebaseapp.com",
+//   "https://my-gamehub-project.web.app",
+//    "http://localhost:4200" 
+// ];
 
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true); // สำหรับ Postman หรือ server-side request
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true
-}));
+// app.use(cors({
+//   origin: (origin, callback) => {
+//     if (!origin) return callback(null, true); // สำหรับ Postman หรือ server-side request
+//     if (allowedOrigins.includes(origin)) {
+//       callback(null, true);
+//     } else {
+//       callback(new Error("Not allowed by CORS"));
+//     }
+//   },
+//   credentials: true
+// }));
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
