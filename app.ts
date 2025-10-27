@@ -2,9 +2,10 @@ import express from "express";
 import cors from "cors";
 import {router as index} from "./controller/index";
 import { router as users } from "./controller/users";
-import { router as upload} from "./controller/upload";
 import { router as trans} from "./controller/trans";
 import { router as games} from "./controller/games";
+import { router as orders } from "./controller/orders";
+import {router as discount} from "./controller/discount";
 import bodyParser from "body-parser";
 import path from "path";
 
@@ -13,10 +14,10 @@ export const app = express();
 // app.use(cors()); //localhost
 
 const allowedOrigins = [
-  
+  "http://localhost:4200" ,
   "https://my-gamehub-project.firebaseapp.com",
   "https://my-gamehub-project.web.app",
-   "http://localhost:4200" 
+   
 ];
 
 app.use(cors({
@@ -36,9 +37,10 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(bodyParser.text());
 app.use(bodyParser.json());
 app.use("/",index);
-app.use("/files",upload);
 app.use("/users",users);
 app.use("/trans",trans);
 app.use("/games",games);
+app.use("/orders",orders);
+app.use("/discount",discount);
 
 

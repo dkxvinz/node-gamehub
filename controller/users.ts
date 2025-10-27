@@ -69,8 +69,7 @@ router.post("/register", async (req, res) => {
         console.log("welcome: ",values);
         return res.status(201).json({
             message: "Register successfully! =>",values ,
-            userId: header.insertId,
-            
+            userId: header.insertId
             
         });
        
@@ -84,7 +83,7 @@ router.post("/register", async (req, res) => {
 //-------------Login---------------------
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
-  console.log("LOGIN TRY:", email, password);
+  console.log("LOGIN :", email, password);
 
   try {
     if (!email || !password) {
@@ -118,7 +117,7 @@ router.post("/login", async (req, res) => {
     }
 
     const payload = { userId: user.user_id, role: user.role };
-    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "15m" });
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "1h" });
 
     return res.status(200).json({
       message: `Login successful! Welcome back: ${user.username}`,

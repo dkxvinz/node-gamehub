@@ -10,7 +10,7 @@ router.get("/",async (req,res) => {
      try {
           const [rows] = await conn.query('SELECT * FROM wallet_transaction');
           res.status(200).json(rows);
-          console.log("on database: ",rows);
+          console.log("transaction on database: ",rows);
      } catch (err:any) {
           console.error(err);
           return res.status(500).json({error:err.message});
@@ -18,6 +18,7 @@ router.get("/",async (req,res) => {
      }
 });
 
+//show user transaction on profile
 router.get("/mytrans/:id",async (req,res) => {
       const  userId = req.params.id;
      try {
@@ -92,6 +93,8 @@ router.post("/topup/:id", async (req, res) => {
     }
 });
 
+//for push game
+//ส่วนนี้ต้องรอบันทึกลง orders,orderItems ก่อน เมื่อสเตตัส3 คือพร้อมจ่ายเงินก่อน ค่อยสามารถตัดลบกับwallet_balanceได้
 router.post("/pay/:id",authMiddleware, async (req, res) => {
   
     const { userId } = req.user;
