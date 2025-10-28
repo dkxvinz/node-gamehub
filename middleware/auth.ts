@@ -32,7 +32,7 @@ export const login = async (req: Request, res: Response) => {
         role: user.role,
       },
       JWT_SECRET,
-      {  expiresIn: '1h'  }
+      {  expiresIn: '10m'  }
     );
 
     return res.status(200).json({
