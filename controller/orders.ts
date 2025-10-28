@@ -54,12 +54,12 @@ router.post("/addCart/:gameId/",authMiddleware, async (req, res) => {
     }
 
   
-    const [checkStatus] = await conn.query("SELECT * FROM orderItems WHERE game_id = ? AND user_id = ? AND state = 'check order'",[gid, uid]);
+    // const [checkStatus] = await conn.query("SELECT * FROM orderItems WHERE game_id = ? AND user_id = ? AND state = 'check order'",[gid, uid]);
 
-    if ((checkStatus as any[]).length > 0) {
-      await conn.query("UPDATE orderItems SET state = 'add cart', price = ? WHERE game_id = ? AND user_id = ?",[gamePrice, gid, uid] );
-      return res.status(200).json({message: "Cancel check order ,Order updated to add cart successfully.",});
-    }
+    // if ((checkStatus as any[]).length > 0) {
+    //   await conn.query("UPDATE orderItems SET state = 'add cart', price = ? WHERE game_id = ? AND user_id = ?",[gamePrice, gid, uid] );
+    //   return res.status(200).json({message: "Cancel check order ,Order updated to add cart successfully.",});
+    // }
     const [insertResult] = await conn.query("INSERT INTO orderItems (game_id, user_id, price, state) VALUES (?, ?, ?, ?)",[gid, uid, gamePrice, "add cart"]);
 
     if ((insertResult as any).affectedRows === 0) {
@@ -74,37 +74,56 @@ router.post("/addCart/:gameId/",authMiddleware, async (req, res) => {
 });
 //------------------------------------------------------- 
 // state = 2 :pre data order
-router.put("/checkOrder/:gameId",async (req,res) =>{
-     const gid = parseInt(req.params.gameId);
-     const uid = req.user.userId; 
-     console.log('[backend]:game id',gid);
-      console.log('[backend]:user id',uid);
-     try{
-      if(!gid || !uid){
-        return res.status(400).json({message:"not found gameId or userId or price value!"});
-      }
+router.put("/checkOrder/:gameId",authMiddleware, async (req, res) => {
+  const gid = parseInt(req.params.gameId);
+  const uid = req.user.userId; 
+  const isChecked = req.body.checked
+  console.log('[backend]: game id', gid);
+  console.log('[backend]: user id', uid);
 
-      const [games] = await conn.query<RowDataPacket[]>('SELECT name, price FROM games WHERE game_id = ?', [gid]);
-      if (games.length === 0) {
-            throw new Error('Game not found');
-        }
-      const gamePrice = games[0].price;
-      const checkItems = "SELECT * FROM orderItems WHERE game_id = ? AND user_id = ? AND state ='add cart";
-      if(checkItems.length == 0){
-        return res.status(401).json({ message: "Invalid order on cart" });
-      }
-        if(checkItems.length > 0){
-        return res.status(409).json({ message: "this game is already!" });
-      }
-      const [results]  = await conn.query("UPDATE orderItems SET state = 'check', price = ? WHERE game_id = ? AND user_id = ?",[gamePrice, gid, uid] );
+  try {
+    if (!gid || !uid) {
+      return res.status(400).json({ message: "not found gameId or userId!" });
+    }
+
+    const [games] = await conn.query<RowDataPacket[]>('SELECT name, price FROM games WHERE game_id = ?', [gid]);
+    if (games.length === 0) {
+      return res.status(404).json({ message: "Game not found" });
+    }
+    const gamePrice = games[0].price;
 
     
-    
-     }catch(e){
-        console.log("Error during add cart process", e);
-        return res.status(500).json({ message: "Internal Server Error" });
-     };
-     
+    const [checkItems] = await conn.query<RowDataPacket[]>(
+      "SELECT * FROM orderItems WHERE game_id = ? AND user_id = ? AND state = 'add cart'",
+      [gid, uid]
+    );
+
+    if (checkItems.length === 0) {
+      return res.status(401).json({ message: "Invalid order on cart" });
+    }
+
+
+    await conn.query(
+      "UPDATE orderItems SET state = ?, price = ? WHERE game_id = ? AND user_id = ?",
+      [isChecked?'check order':'uncheck',gamePrice, gid, uid]
+    );
+
+
+ const [totalResult] = await conn.query<RowDataPacket[]>(
+  "SELECT SUM(price) as totalPrice FROM orderItems WHERE user_id = ? AND state = 'check order'",
+  [uid]
+);
+
+    res.json({
+      message: isChecked ? "Item selected" : "Item unselected",
+      price: gamePrice,
+      totalPrice: totalResult[0].totalPrice
+    });
+
+  } catch (e) {
+    console.error("Error during check order process", e);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 });
 
 // //check order :join by oid = uid
